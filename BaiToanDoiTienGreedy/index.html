@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Toán Đổi Tiền (Greedy Algorithm)</title>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --primary-hover: #1557b0;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --success: #28a745;
+            --danger: #dc3545;
+            --border: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            background: #fafafa;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .btn-solve {
+            width: 100%;
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            margin-top: 1rem;
+        }
+
+        .btn-solve:hover {
+            background-color: #218838;
+        }
+
+        .btn-solve:active {
+            transform: scale(0.98);
+        }
+
+        .result-box {
+            margin-top: 2rem;
+            background: #f8f9fa;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            min-height: 200px;
+        }
+
+        .theory-content {
+            line-height: 1.8;
+            color: var(--text-main);
+        }
+
+        .theory-content h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .custom-input-wrapper {
+            margin-left: 1.5rem;
+            display: none;
+        }
+
+        .custom-input-wrapper.active {
+            display: block;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>BÀI TOÁN ĐỔI TIỀN (GREEDY ALGORITHM)</h1>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active">Thực nghiệm</button>
+        </div>
+
+        <!-- Execution Tab -->
+        <div id="execution" class="tab-content active">
+            <div class="form-group">
+                <label for="amount">Số tiền cần đổi: <span id="amount-unit"
+                        style="font-weight:normal;color:#1a73e8;font-size:0.9rem;">(đơn vị: VNĐ)</span></label>
+                <input type="number" id="amount" value="125000" min="0" placeholder="Nhập số tiền...">
+            </div>
+
+            <div class="form-group">
+                <label>Hệ thống tiền tệ:</label>
+                <div class="radio-group">
+                    <label class="radio-item">
+                        <input type="radio" name="currency" value="VND" checked onchange="onCurrencyChange()">
+                        <span>VND (1k, 2k, 5k, 10k, 20k, 50k, 100k, 200k, 500k)</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="currency" value="USD" onchange="onCurrencyChange()">
+                        <span>USD ($1, $5, $10, $20, $50, $100)</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="currency" value="CUSTOM" id="custom-radio"
+                            onchange="onCurrencyChange()">
+                        <span>Tùy chỉnh</span>
+                    </label>
+                    <div class="custom-input-wrapper" id="custom-wrapper">
+                        <input type="text" id="custom-denoms" value="1, 3, 4" placeholder="Ví dụ: 1, 5, 10">
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-solve" onclick="solve()">THỰC HIỆN ĐỔI TIỀN</button>
+
+            <div class="result-box" id="result-text">Kết quả sẽ hiển thị ở đây...</div>
+        </div>
+
+    </div>
+
+    <script>
+        function switchTab(tabId, btn) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            // Add active class to selected
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function onCurrencyChange() {
+            const mode = document.querySelector('input[name="currency"]:checked').value;
+            const wrapper = document.getElementById('custom-wrapper');
+            const unitLabel = document.getElementById('amount-unit');
+            const amountInput = document.getElementById('amount');
+
+            if (mode === 'CUSTOM') {
+                wrapper.classList.add('active');
+            } else {
+                wrapper.classList.remove('active');
+            }
+
+            if (mode === 'VND') {
+                unitLabel.textContent = '(đơn vị: VNĐ)';
+                amountInput.placeholder = 'Ví dụ: 125000';
+                amountInput.value = '125000';
+            } else if (mode === 'USD') {
+                unitLabel.textContent = '(đơn vị: Dollar — ví dụ: 250 = $250)';
+                amountInput.placeholder = 'Ví dụ: 250';
+                amountInput.value = '250';
+            } else {
+                unitLabel.textContent = '(đơn vị tuỳ theo mệnh giá nhập)';
+                amountInput.placeholder = 'Nhập số tiền...';
+            }
+        }
+
+        function toggleCustomInput() {
+            onCurrencyChange();
+        }
+
+        function greedySolve(amount, denominations) {
+            // Sort descending
+            const sortedDenoms = [...denominations].sort((a, b) => b - a);
+            const result = {};
+            let remaining = amount;
+
+            for (const d of sortedDenoms) {
+                if (d <= 0) continue;
+                const count = Math.floor(remaining / d);
+                if (count > 0) {
+                    result[d] = count;
+                    remaining %= d;
+                }
+            }
+
+            return { result, remaining };
+        }
+
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function solve() {
+            const amountInput = document.getElementById('amount').value;
+            const amount = parseInt(amountInput, 10);
+
+            if (isNaN(amount) || amount < 0) {
+                alert("Vui lòng nhập số tiền hợp lệ (số nguyên dương)!");
+                return;
+            }
+
+            let mode = document.querySelector('input[name="currency"]:checked').value;
+            let denoms = [];
+            let amountToSolve = amount;
+            let isUSD = false;
+
+            if (mode === "VND") {
+                denoms = [500000, 200000, 100000, 50000, 20000, 10000, 5000, 2000, 1000];
+            } else if (mode === "USD") {
+                // Nhập theo dollar, tính bằng cent nội bộ
+                // Mệnh giá: $100,$50,$20,$10,$5,$1, 25¢,10¢,5¢,1¢ (tính bằng cent)
+                isUSD = true;
+                amountToSolve = amount * 100; // đổi dollar sang cent
+                denoms = [10000, 5000, 2000, 1000, 500, 100, 25, 10, 5, 1];
+            } else {
+                const customStr = document.getElementById('custom-denoms').value;
+                denoms = customStr.split(",").map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+            }
+
+            if (denoms.length === 0) {
+                alert("Vui lòng nhập danh sách mệnh giá hợp lệ!");
+                return;
+            }
+
+            const { result, remaining } = greedySolve(amountToSolve, denoms);
+
+            // Hàm format mệnh giá USD (từ cent sang hiển thị $/$¢)
+            function formatDenom(cent) {
+                if (cent >= 100) return '$' + (cent / 100);
+                return cent + '¢';
+            }
+
+            const resBox = document.getElementById('result-text');
+            let output = isUSD
+                ? `Số tiền cần đổi: $${formatNumber(amount)}\n`
+                : `Số tiền cần đổi: ${formatNumber(amount)}\n`;
+            output += `Hệ thống tiền: ${mode}\n`;
+            output += "-".repeat(34) + "\n";
+
+            let totalCoins = 0;
+            const keys = Object.keys(result).map(Number).sort((a, b) => b - a);
+
+            if (keys.length > 0) {
+                for (const d of keys) {
+                    const count = result[d];
+                    totalCoins += count;
+                    const denomLabel = isUSD ? formatDenom(d).padStart(8) : formatNumber(d).padStart(12);
+                    output += `Mệnh giá ${denomLabel}: ${count.toString().padStart(5)} tờ\n`;
+                }
+                output += "-".repeat(40) + "\n";
+                output += `TỔNG CỘNG: ${totalCoins} tờ\n`;
+            } else {
+                if (amount > 0) {
+                    output += "Không thể đổi bằng các mệnh giá đã cho.\n";
+                } else {
+                    output += "Số tiền là 0, không cần đổi.\n";
+                }
+            }
+
+            if (remaining > 0) {
+                const remStr = isUSD ? `$${(remaining / 100).toFixed(2)}` : formatNumber(remaining);
+                output += `\nCHÚ Ý: Còn dư ${remStr} không thể đổi tiếp.\n`;
+            }
+
+            resBox.textContent = output;
+        }
+    </script>
+</body>
+
+</html>
